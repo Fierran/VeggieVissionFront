@@ -1,0 +1,43 @@
+[
+    {
+      "id": "L001",
+      "uri": "https://www.bancodealimentoschicago.org/wp-content/uploads/2022/03/Plantain-1.jpg",
+      "name": "Plátano",
+      "estado": "Maduro",
+      "diasRestantes": 3,
+      "fechaPudricion": "2025-05-04"
+    },
+    {
+      "id": "L002",
+      "uri": "https://www.recetasnestle.com.mx/sites/default/files/inline-images/tipos-de-manzana-royal-gala.jpg",
+      "name": "Manzana",
+      "estado": "Verde",
+      "diasRestantes": 7,
+      "fechaPudricion": "2025-05-08"
+    },
+    {
+      "id": "L003",
+      "uri": "https://medibangpaint.com/wp-content/uploads/2020/02/IMG_0408.jpg",
+      "name": "Fresa",
+      "estado": "Pasada",
+      "diasRestantes": 1,
+      "fechaPudricion": "2025-05-02"
+    }
+    ,    {
+      "id": "L004",
+      "uri": "https://medibangpaint.com/wp-content/uploads/2020/02/IMG_0408.jpg",
+      "name": "Fresa",
+      "estado": "Pasada",
+      "diasRestantes": 1,
+      "fechaPudricion": "2025-05-02"
+    },
+    {
+      "id": "L005",
+      "uri": "https://medibangpaint.com/wp-content/uploads/2020/02/IMG_0408.jpg",
+      "name": "Fresa",
+      "estado": "Pasada",
+      "diasRestantes": 1,
+      "fechaPudricion": "2025-05-02"
+    }
+  ]
+  
