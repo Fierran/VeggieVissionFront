@@ -4,12 +4,14 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import FloattingButton from "../Components/FloattingButton";
 import Search from '../Components/search';
 import lotesData from '../../assets/data/ejemplos.json';
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { useRouter } from 'expo-router';
 import Weather from '../Components/weather';
 import { useIsFocused } from "@react-navigation/native";
 import Icon2 from "react-native-vector-icons/FontAwesome6";
+import Icon from 'react-native-vector-icons/AntDesign';
 import { Picker } from '@react-native-picker/picker';
+import ModalPhoto from '../Components/Modals/ModalFoto';
+import ModalFilter from '../Components/Modals/ModalFilter';
 
 
 
@@ -25,8 +27,9 @@ export default function Home() {
   const scrollY = useRef(new Animated.Value(0)).current;
   const isFocused = useIsFocused();
   const [modalVisible, setModalVisible] = useState(false);
-  const [filtroTipo, setFiltroTipo] = useState(null); // "fruta" | "verdura" | null
-  const [filtroEstado, setFiltroEstado] = useState(null); // "maduro", "verde", etc.
+  const [photoModalVisible, setPhotoModalVisible] = useState(false);
+  const [filtroTipo, setFiltroTipo] = useState(null);
+  const [filtroEstado, setFiltroEstado] = useState(null); 
 
   const [tempTipo, setTempTipo] = useState('');
   const [tempEstado, setTempEstado] = useState('');
@@ -70,13 +73,13 @@ export default function Home() {
               </View>
           </View>
           <View style= {{flexDirection: "row"}}>
-            <View style= {{ backgroundColor: "#bfdeff", width: "45%", borderRadius: 5, padding: 7}}>
-              <Text>Madura en:</Text>
+            <View style= {{ backgroundColor: "#EFF6FF", width: "45%", borderRadius: 5, padding: 7}}>
+              <Text style={{color: "#3B82F6"}}>Madura en:</Text>
               <Text>{item.diasRestantes} dias</Text>
             </View>
             <View style= {{width: "10%"}}></View>
-            <View style= {{ backgroundColor: "#ffc3ba", width: "45%", borderRadius: 5, padding: 7}}>
-              <Text>Se pudre en:</Text>
+            <View style= {{ backgroundColor: "#FFFBEB", width: "45%", borderRadius: 5, padding: 7}}>
+              <Text style={{color: "#F59E08"}}>Se pudre en:</Text>
               <Text>{item.diasRestantes} dias</Text>
             </View>
           </View>
@@ -90,7 +93,7 @@ export default function Home() {
         <Text>{item.id}</Text>
       </View>
       <View style={styles.estado}>
-        <Text>{item.estado}</Text>
+        <Text style = {{color: '166534'}}>{item.estado}</Text>
       </View>
     </View>
   );
@@ -132,12 +135,13 @@ export default function Home() {
       <Animated.View style={[styles.headerContainer, { transform: [{ translateY: headerTranslate }] }]}>
         <Text style={styles.header}>DashBoard</Text>
         <Search searchText={searchText} handleSearch={handleSearch} />
-        <TouchableOpacity onPress={() => {
+        <TouchableOpacity style= {styles.fylter} onPress={() => {
           setTempTipo(filtroTipo);
           setTempEstado(filtroEstado);
           setModalVisible(true);
         }}>
-          <Text>🔍 Filtros</Text>
+          <Icon name="filter" size={20} color={'#000'}/>
+          <Text>Filtros</Text>
         </TouchableOpacity>
       </Animated.View>
 
@@ -145,7 +149,7 @@ export default function Home() {
         data={filteredData}
         keyExtractor={item => item.id}
         renderItem={renderItem}
-        contentContainerStyle={{ paddingTop: 100, paddingBottom: 30 }}
+        contentContainerStyle={{ paddingTop: 130, paddingBottom: 30 }}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
           { useNativeDriver: true }
@@ -157,57 +161,28 @@ export default function Home() {
         onPress={() => {
           setTempTipo(filtroTipo);
           setTempEstado(filtroEstado);
-          setModalVisible(true);
+          setPhotoModalVisible(true);
         }}
         icon="plus"
-        backgroundColor="#09E85E"
+        backgroundColor="#16A34A"
         position={{ bottom: 30, right: 30 }}
       />
-        <Modal
-          visible={modalVisible}
-          transparent={true}
-          animationType="slide"
-          onRequestClose={() => setModalVisible(false)}
-        >
-          <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 20 }}>
-            <View style={{ backgroundColor: 'white', borderRadius: 10, padding: 20 }}>
-              <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 10 }}>Filtros</Text>
+      <ModalFilter
+        modalVisible={modalVisible}
+        setModalVisible={setModalVisible}
+        tempTipo={tempTipo}
+        setTempTipo={setTempTipo}
+        tempEstado={tempEstado}
+        setTempEstado={setTempEstado}
+        setFiltroTipo={setFiltroTipo}
+        setFiltroEstado={setFiltroEstado}
+        aplicarFiltros={aplicarFiltros}
+        searchText={searchText}
+      />
 
-              <Text>Tipo:</Text>
-              <Picker
-                selectedValue={tempTipo}
-                onValueChange={(itemValue) => setTempTipo(itemValue)}
-                style={{ marginBottom: 10 }}
-              >
-                <Picker.Item label="Todos" value="" />
-                <Picker.Item label="Fruta" value="fruta" />
-                <Picker.Item label="Verdura" value="verdura" />
-              </Picker>
-
-              <Text>Estado:</Text>
-              <Picker
-                selectedValue={tempEstado}
-                onValueChange={(itemValue) => setTempEstado(itemValue)}
-                style={{ marginBottom: 10 }}
-              >
-                <Picker.Item label="Todos" value="" />
-                <Picker.Item label="Maduro" value="Maduro" />
-                <Picker.Item label="Verde" value="Verde" />
-                <Picker.Item label="Podrido" value="Pasada" />
-              </Picker>
-
-              <Button
-                title="Aplicar Filtros"
-                onPress={() => {
-                  setFiltroTipo(tempTipo);
-                  setFiltroEstado(tempEstado);
-                  aplicarFiltros(searchText,tempTipo, tempEstado);
-                  setModalVisible(false);
-                }}
-              />
-            </View>
-          </View>
-        </Modal>
+        <ModalPhoto           
+          visible={photoModalVisible}
+          setPhotoModalVisible={setPhotoModalVisible}></ModalPhoto>
 
 
     </View>
@@ -217,7 +192,7 @@ export default function Home() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#F9FAFB',
   },
   header: {
     marginTop: 5,
@@ -257,6 +232,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     zIndex: 10,
     elevation: 4,
+    overflow: 'hidden',
+    paddingBottom: 20
   },
   id: {
     position: 'absolute', 
@@ -274,12 +251,32 @@ const styles = StyleSheet.create({
       flexGrow: 1,
       right: 10, 
       top: 10,
-      backgroundColor: "#f2ffb0", 
+      backgroundColor: "#DCFCE7", 
       height: 25,
       width: 60, 
       borderRadius: 5, 
       justifyContent: "center", 
       alignItems: "center"
+  },
+  fylter: {
+    height: "30%", 
+    backgroundColor: "#fff", 
+    elevation: 5,
+    width: "20%",
+    borderRadius: 5,
+    flexDirection: "row",
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 10
+  },
+  button: {
+    height: "15%",
+    width: "80%",
+    justifyContent: 'center',
+    alignItems: "center",
+    backgroundColor: "#16A34A",
+    alignSelf: 'center',
+    borderRadius: 5,
   }
   
 });

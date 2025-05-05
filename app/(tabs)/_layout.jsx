@@ -12,7 +12,7 @@ const TabLayout = () => {
             <Stack.Screen name="home" options={{title: "VeggieVision", headerBackVisible: false, tabBarIcon: ({color, size}) => <Icon name = {'camera'} color={color} size={size}/>,
             headerStyle:{backgroundColor: "#fff" }, headerTitleStyle:{color: "#000", fontWeight: "bold", },
             headerLeft: () => (
-                <Ionicons name="leaf-outline" size={24} color="#4fdb41" style={{paddingRight: 3}} />
+                <Ionicons name="leaf-outline" size={24} color="#16A34A" style={{paddingRight: 3}} />
             ),
             headerRight: () => (
                 <Weather/>
