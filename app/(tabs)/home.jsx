@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import {FlatList, View, Text, StyleSheet, Animated, TouchableOpacity, Button, Image, Modal, TextInput } from "react-native";
+import {View, Text, StyleSheet, Animated, TouchableOpacity, Button, Image, } from "react-native";
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import FloattingButton from "../Components/FloattingButton";
 import Search from '../Components/search';

@@ -1,8 +1,9 @@
-import React, { useState, useRef } from 'react';
-import { TouchableOpacity, Text, StyleSheet, Modal, View, Image, Alert } from "react-native";
+import React, {useState, useEffect, useRef } from 'react';
+import { TouchableOpacity, Text, StyleSheet, Modal, View, Image, Alert, Animated, Easing } from "react-native";
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import Icon from 'react-native-vector-icons/Feather';
 import * as ImagePicker from 'expo-image-picker';
+import data from '../../../assets/data/ejemplos.json';
 
 export default function ModalPhoto({ visible, setPhotoModalVisible }) {
   const [facing, setFacing] = useState("back");
@@ -10,6 +11,30 @@ export default function ModalPhoto({ visible, setPhotoModalVisible }) {
   const cameraRef = useRef(null);
   const [permission, requestPermission] = useCameraPermissions();
   const [showCamera, setShowCamera] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const rotateValue = useRef(new Animated.Value(0)).current;
+  const [resultado, setResultado] = useState(null);
+
+
+
+  useEffect(() => {
+    if (isUploading) {
+      Animated.loop(
+        Animated.timing(rotateValue, {
+          toValue: 1,
+          duration: 1000,
+          easing: Easing.linear,
+          useNativeDriver: true,
+        })
+      ).start();
+    } else {
+      rotateValue.stopAnimation();
+      rotateValue.setValue(0);
+    }
+  }, [isUploading]);
+  
+
+
 
   if (!permission) return <View />;
   if (!permission.granted) {
@@ -72,6 +97,27 @@ export default function ModalPhoto({ visible, setPhotoModalVisible }) {
                 <Text>Confirmar</Text>
               </TouchableOpacity>
             </>
+          ) : isUploading ? (
+            <View style={[styles.uploadingContainer]}>
+            <Animated.View
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 20,
+                borderWidth: 5,
+                borderColor: '#16A34A',
+                borderTopColor: 'transparent',
+                transform: [{
+                  rotate: rotateValue.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['0deg', '360deg']
+                  })
+                }]
+              }}
+            />
+
+            <Text style={{ marginTop: 10 }}>Analizando imagen</Text>
+            </View>
           ) : showCamera ? (
             <>
               <View style={{ width: '100%', aspectRatio: 3 / 4, borderRadius: 10, overflow: 'hidden' }}>
@@ -171,5 +217,21 @@ const styles = StyleSheet.create({
     height: 40,
     width: "40%",
     margin: 10
+  },
+  uploadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 40,
+    backgroundColor: 'white',
+    borderRadius: 10,
+  },
+  spinner: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 5,
+    borderColor: '#16A34A',
+    borderTopColor: 'transparent',
+    animation: 'spin 1s linear infinite',
   },
 });
