@@ -1,29 +1,44 @@
 import { StatusBar } from 'expo-status-bar';
-import { SafeAreaView, StyleSheet, Text, View,TouchableOpacity, Image } from 'react-native';
+import { SafeAreaView, StyleSheet, Text, View,TouchableOpacity, Image, TextInput } from 'react-native';
 import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function SignIn() {
-  const color = styles.container.color
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar  translucent={false} style='light' />
-      <View style= {{alignItems: "center"}}>
-        <Text style= {[styles.title, {marginBottom: 30}]}>Bienvenido a VeggieVision</Text>
-        <TouchableOpacity style= {styles.loginButton} onPress={() => {router.push("home")}}>
-          <Image source={require('../../assets/google-logo.png')} style={styles.image}/>
-          <Text style={styles.textButton}>Iniciar Sesion</Text>
-        </TouchableOpacity>
+    <View style={styles.container}>
+      <View style={styles.content}>
+          <Ionicons name="leaf-outline" size={150} color="#16A34A" />
+            <View style={{width: '100%'}}>
+              <Text style={styles.homeText}>Bienvenido a Veggie Vision</Text>
+              <TextInput placeholder=' Nombre de Usuario*' style={styles.input}/>
+              <TextInput placeholder=' Contraseña*' style={styles.input}/>
+            </View>
+            <View style={{width: '100%'}}>
+              <TouchableOpacity style={styles.button} onPress={() => router.replace('home')}>
+              <Text style={styles.ButtonText}>Iniciar sesion</Text>
+            </TouchableOpacity>
+              <View style={{ flexDirection: "row", alignSelf: 'center'}}>
+                <Text style={{color: "black"}}>¿Nuevo en Veggie Vision?</Text>
+                <TouchableOpacity onPress={() => router.push('register')}>
+                    <Text style={{color: "black", fontWeight: "bold"}}> Registrate Aquí</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0C0A09',
+    backgroundColor: '#F9FAFB',
+  },
+  content: {
+    flex: 1,
+    justifyContent: 'space-around',
     alignItems: 'center',
-    justifyContent: "center",
+    
   },
   loginButton: {
     height: 50,
@@ -49,6 +64,39 @@ const styles = StyleSheet.create({
     height: 45,
     width: 45,
     marginRight:10
+  },
+  input: {
+    height: 40,
+    padding: 5,
+    alignSelf: "center",
+    width: "80%",
+    borderColor: "gray",
+    borderWidth: 1,
+    borderRadius: 5,
+    marginBottom: 20,
+  },
+  homeText: {
+    marginLeft: "10%", 
+    marginRight: "10%",
+    marginBottom: "10%",
+    fontWeight:'bold', 
+    fontSize:25,
+    alignSelf: "center"
+  },
+  button:{
+    backgroundColor: "#16A34A",
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 15,
+    width: "80%",
+    alignSelf: "center",
+    alignItems: "center",
+    marginBottom: 10
+  },
+  ButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
   }
   
 });

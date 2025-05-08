@@ -7,6 +7,7 @@ const LoginLayout = () => {
         <SafeAreaView style={styles.container}>
             <Stack>
                 <Stack.Screen name="index" options={{ headerShown: false }} />
+                <Stack.Screen name="register" options={{title: 'Registrarse', headerShown: true }} />
             </Stack>
         </SafeAreaView>
     );
