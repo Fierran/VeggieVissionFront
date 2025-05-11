@@ -1,32 +1,54 @@
-import React from "react";
-import { View, StyleSheet, TextInput, Text, TouchableOpacity } from "react-native";
+import React, {useState, useEffect}from "react";
+import { View, StyleSheet, TextInput, Text, TouchableOpacity, Alert } from "react-native";
 import { router } from "expo-router";
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { auth } from "../../firebase-config";
 
 export default function Register() {
+  const [email,setEmail] = React.useState('')
+  const [password,setPassword] = React.useState('')
+  const [name,setName] = React.useState('')
+  const [lastName,setLastName] = React.useState('')
+
+  const handleCreateAccount = () => {
+    createUserWithEmailAndPassword(auth,email,password)
+    .then(async (userCredential) => {
+      const user = userCredential.user
+      const fullName = `${name} ${lastName}`;
+      //Si despues necesitamos usar el nombre, se puede con 
+      await updateProfile(user, { displayName: fullName });
+      console.log(user)
+      Alert.alert('Usuario Registrado')
+      router.replace("/")
+    })
+    .catch(error => {
+      console.log(error)
+    })
+  }
   return (
     <View style={styles.container}>
       <View style={styles.row}>
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Nombre:</Text>
-          <TextInput placeholder="Nombre" style={styles.input} />
+          <TextInput onChangeText= {(text) => setName(text)} placeholder="Nombre" style={styles.input} />
         </View>
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Apellido:</Text>
-          <TextInput placeholder="Apellido" style={styles.input} />
+          <TextInput onChangeText= {(text) => setLastName(text)} placeholder="Apellido" style={styles.input} />
         </View>
       </View>
 
       <View style={styles.fullWidthInputContainer}>
         <Text style={styles.label}>Correo Electrónico:</Text>
-        <TextInput placeholder="Correo Electrónico" style={styles.fullWidthInput} />
+        <TextInput onChangeText= {(text) => setEmail(text)} placeholder="Correo Electrónico" style={styles.fullWidthInput} />
       </View>
 
       <View style={styles.fullWidthInputContainer}>
         <Text style={styles.label}>Contraseña:</Text>
-        <TextInput placeholder="Contraseña" secureTextEntry style={styles.fullWidthInput} />
+        <TextInput onChangeText= {(text) => setPassword(text)} placeholder="Contraseña" secureTextEntry style={styles.fullWidthInput} />
       </View>
 
-        <TouchableOpacity style={styles.button} onPress={() => router.push('/')}>
+        <TouchableOpacity style={styles.button} onPress={handleCreateAccount}>
             <Text style={styles.ButtonText}>Registrarse</Text>
         </TouchableOpacity>
     </View>

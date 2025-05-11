@@ -6,7 +6,7 @@ import { StatusBar } from "expo-status-bar";
 const RootLayout = () => {
     return(
             <SafeAreaProvider>
-                <Stack>
+                <Stack initialRouteName="(auth)">
                     <Stack.Screen name="(auth)"options={{headerShown: false}}/>
                     <Stack.Screen name="(tabs)"options={{headerShown: false}}/>
                     <Stack.Screen name="(screens)"options={{headerShown: false}}/>

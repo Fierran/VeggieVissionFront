@@ -12,6 +12,7 @@ import Icon from 'react-native-vector-icons/AntDesign';
 import { Picker } from '@react-native-picker/picker';
 import ModalPhoto from '../Components/Modals/ModalFoto';
 import ModalFilter from '../Components/Modals/ModalFilter';
+import { auth } from '../../firebase-config';
 
 
 
@@ -30,6 +31,7 @@ export default function Home() {
   const [photoModalVisible, setPhotoModalVisible] = useState(false);
   const [filtroTipo, setFiltroTipo] = useState(null);
   const [filtroEstado, setFiltroEstado] = useState(null); 
+  const [nombre,setNombre] = useState('')
 
   const [tempTipo, setTempTipo] = useState('');
   const [tempEstado, setTempEstado] = useState('');
@@ -54,6 +56,13 @@ export default function Home() {
     setSearchText(text);
     aplicarFiltros(text, filtroTipo, filtroEstado,);
   };
+
+    useEffect(() => {
+    const user = auth.currentUser;
+    if (user) {
+      setNombre(user.displayName);  // Aquí obtenemos el nombre completo
+    }
+  }, []);
   
 
   const renderItem = ({ item }) => (
@@ -133,7 +142,7 @@ export default function Home() {
   return (
     <View style={styles.container}>
       <Animated.View style={[styles.headerContainer, { transform: [{ translateY: headerTranslate }] }]}>
-        <Text style={styles.header}>DashBoard</Text>
+        <Text style={styles.header}>DashBoard de {nombre || 'Usuario'}</Text>
         <Search searchText={searchText} handleSearch={handleSearch} />
         <TouchableOpacity style= {styles.fylter} onPress={() => {
           setTempTipo(filtroTipo);
