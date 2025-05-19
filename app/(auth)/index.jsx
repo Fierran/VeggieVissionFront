@@ -15,7 +15,6 @@ export default function SignIn() {
       .then((userCredential) => {
         console.log("Sesion iniciada")
         const user = userCredential.user
-        console.log(user)
         router.replace('home')
       })
       .catch(error => {

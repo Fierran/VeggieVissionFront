@@ -32,8 +32,8 @@ export default function ModalFilter({
             style={styles.picker}
           >
             <Picker.Item label="Todos" value="" />
-            <Picker.Item label="Fruta" value="fruta" />
-            <Picker.Item label="Verdura" value="verdura" />
+            <Picker.Item label="Fruta" value="fruit" />
+            <Picker.Item label="Verdura" value="vegetable" />
           </Picker>
 
           <Text>Estado:</Text>

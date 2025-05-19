@@ -25,7 +25,6 @@ export default function PhotoImage() {
       "Se ha generado un ID y agregado al inventario (simulado)."
     );
     // En el futuro: guardar lote en backend o contexto
-    router.push("Inventory"); // Navega al inventario
   };
 
   if (!analysisResult) {
