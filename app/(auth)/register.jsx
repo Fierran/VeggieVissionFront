@@ -1,56 +1,108 @@
-import React, {useState, useEffect}from "react";
-import { View, StyleSheet, TextInput, Text, TouchableOpacity, Alert } from "react-native";
+import React, { useState } from "react";
+import { View, StyleSheet, TextInput, Text, TouchableOpacity } from "react-native";
 import { router } from "expo-router";
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth } from "../../firebase-config";
 
-export default function Register() {
-  const [email,setEmail] = React.useState('')
-  const [password,setPassword] = React.useState('')
-  const [name,setName] = React.useState('')
-  const [lastName,setLastName] = React.useState('')
+import LoadingModal from '../Components/Modals/ModalLoading';
+import ErrorModal from '../Components/Modals/ModalError';
+import SuccessModal from "../Components/Modals/ModalSucces";
 
-  const handleCreateAccount = () => {
-    createUserWithEmailAndPassword(auth,email,password)
-    .then(async (userCredential) => {
-      const user = userCredential.user
+export default function Register() {
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [name, setName] = React.useState('');
+  const [lastName, setLastName] = React.useState('');
+
+  const [loading, setLoading] = useState(false);
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
+
+  const handleCreateAccount = async () => {
+    setLoading(true);
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
       const fullName = `${name} ${lastName}`;
-      //Si despues necesitamos usar el nombre, se puede con 
       await updateProfile(user, { displayName: fullName });
-      console.log(user)
-      Alert.alert('Usuario Registrado')
-      router.replace("/")
-    })
-    .catch(error => {
-      console.log(error)
-    })
-  }
+      console.log("Usuario registrado", user);
+      setSuccessModalVisible(true);
+    } catch (error) {
+      console.log(error);
+      setErrorModalVisible(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Función para cerrar el modal de éxito y navegar a la pantalla de inicio
+  const handleSuccessClose = () => {
+    setSuccessModalVisible(false);
+    router.replace('/');  // Navega a index (pantalla principal)
+  };
+
   return (
     <View style={styles.container}>
+      {/* Modales */}
+      <LoadingModal visible={loading} message="Registrando usuario..." />
+      <ErrorModal
+        visible={errorModalVisible}
+        onClose={() => setErrorModalVisible(false)}
+        title="Error al registrar"
+        message="Verifica tus datos e inténtalo de nuevo."
+      />
+      <SuccessModal
+        visible={successModalVisible}
+        onClose={handleSuccessClose}
+        title="¡Registro exitoso!"
+        message="Bienvenido a Veggie Vision."
+      />
+
       <View style={styles.row}>
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Nombre:</Text>
-          <TextInput onChangeText= {(text) => setName(text)} placeholder="Nombre" style={styles.input} />
+          <TextInput
+            onChangeText={setName}
+            placeholder="Nombre"
+            style={styles.input}
+            autoCapitalize="words"
+          />
         </View>
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Apellido:</Text>
-          <TextInput onChangeText= {(text) => setLastName(text)} placeholder="Apellido" style={styles.input} />
+          <TextInput
+            onChangeText={setLastName}
+            placeholder="Apellido"
+            style={styles.input}
+            autoCapitalize="words"
+          />
         </View>
       </View>
 
       <View style={styles.fullWidthInputContainer}>
         <Text style={styles.label}>Correo Electrónico:</Text>
-        <TextInput onChangeText= {(text) => setEmail(text)} placeholder="Correo Electrónico" style={styles.fullWidthInput} />
+        <TextInput
+          onChangeText={setEmail}
+          placeholder="Correo Electrónico"
+          style={styles.fullWidthInput}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
       </View>
 
       <View style={styles.fullWidthInputContainer}>
         <Text style={styles.label}>Contraseña:</Text>
-        <TextInput onChangeText= {(text) => setPassword(text)} placeholder="Contraseña" secureTextEntry style={styles.fullWidthInput} />
+        <TextInput
+          onChangeText={setPassword}
+          placeholder="Contraseña"
+          secureTextEntry
+          style={styles.fullWidthInput}
+        />
       </View>
 
-        <TouchableOpacity style={styles.button} onPress={handleCreateAccount}>
-            <Text style={styles.ButtonText}>Registrarse</Text>
-        </TouchableOpacity>
+      <TouchableOpacity style={styles.button} onPress={handleCreateAccount}>
+        <Text style={styles.ButtonText}>Registrarse</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -99,7 +151,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     width: '100%',
   },
-  button:{
+  button: {
     backgroundColor: "#16A34A",
     paddingVertical: 12,
     paddingHorizontal: 32,

@@ -13,6 +13,7 @@ import ModalFilter from '../Components/Modals/ModalFilter';
 import { signOut } from 'firebase/auth';
 import { auth, db } from '../../firebase-config';
 import { collection, getDocs } from "firebase/firestore";
+import { query, where } from "firebase/firestore";
 
 export default function Home() {
   const [facing, setFacing] = useState("back");
@@ -41,11 +42,18 @@ export default function Home() {
   // Función para obtener análisis desde Firestore y actualizar el estado
   const obtenerAnalisis = async () => {
     try {
-      const snapshot = await getDocs(collection(db, "analisis"));
+      const user = auth.currentUser;
+      if (!user) return [];
+
+      // Query para filtrar por UID
+      const q = query(collection(db, "analisis"), where("uid", "==", user.uid));
+      const snapshot = await getDocs(q);
+
       const todosLosAnalisis = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
+
       setFilteredData(todosLosAnalisis);
       setAnalisisGuardados(todosLosAnalisis);
       return todosLosAnalisis;
