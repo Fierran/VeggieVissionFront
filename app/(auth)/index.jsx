@@ -1,6 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { SafeAreaView, StyleSheet, Text, View,TouchableOpacity, Image, TextInput } from 'react-native';
+import { SafeAreaView, StyleSheet, Text, View,TouchableOpacity, Image, TextInput, } from 'react-native';
+import LoadingModal from '../Components/Modals/ModalLoading';
+import ErrorModal from '../Components/Modals/ModalError';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
@@ -9,38 +11,60 @@ import { auth } from '../../firebase-config';
 export default function SignIn() {
   const [email,setEmail] = React.useState('')
   const [password,setPassword] = React.useState('')
+  const [loading, setLoading] = useState(false);
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
 
-    const handleSignIn = () => {
-      signInWithEmailAndPassword(auth,email,password)
-      .then((userCredential) => {
-        console.log("Sesion iniciada")
-        const user = userCredential.user
-        router.replace('home')
-      })
-      .catch(error => {
-        console.log(error)
-      })
+  const handleSignIn = async () => {
+    setLoading(true);
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      console.log("Sesión iniciada");
+      router.replace('home');
+    } catch (error) {
+      console.log(error);
+      setErrorModalVisible(true);
+    } finally {
+      setLoading(false);
     }
+  };
   return (
     <View style={styles.container}>
+      <LoadingModal visible={loading} message="Iniciando sesión..." />
+      <ErrorModal
+        visible={errorModalVisible}
+        onClose={() => setErrorModalVisible(false)}
+        title="Error al iniciar sesión"
+        message="Verifica tu correo y contraseña."
+      />
+
       <View style={styles.content}>
-          <Ionicons name="leaf-outline" size={150} color="#16A34A" />
-            <View style={{width: '100%'}}>
-              <Text style={styles.homeText}>Bienvenido a Veggie Vision</Text>
-              <TextInput onChangeText= {(text) => setEmail(text)} placeholder=' Nombre de Usuario*' style={styles.input}/>
-              <TextInput onChangeText= {(text) => setPassword(text)} placeholder=' Contraseña*' style={styles.input}/>
-            </View>
-            <View style={{width: '100%'}}>
-              <TouchableOpacity style={styles.button} onPress={handleSignIn}>
-              <Text style={styles.ButtonText}>Iniciar sesion</Text>
+        <Ionicons name="leaf-outline" size={150} color="#16A34A" />
+        <View style={{ width: '100%' }}>
+          <Text style={styles.homeText}>Bienvenido a Veggie Vision</Text>
+          <TextInput
+            onChangeText={setEmail}
+            placeholder=" Nombre de Usuario*"
+            style={styles.input}
+            autoCapitalize="none"
+          />
+          <TextInput
+            onChangeText={setPassword}
+            placeholder=" Contraseña*"
+            style={styles.input}
+            secureTextEntry
+          />
+        </View>
+        <View style={{ width: '100%' }}>
+          <TouchableOpacity style={styles.button} onPress={handleSignIn}>
+            <Text style={styles.ButtonText}>Iniciar sesión</Text>
+          </TouchableOpacity>
+          <View style={{ flexDirection: 'row', alignSelf: 'center' }}>
+            <Text style={{ color: 'black' }}>¿Nuevo en Veggie Vision?</Text>
+            <TouchableOpacity onPress={() => router.push('register')}>
+              <Text style={{ color: 'black', fontWeight: 'bold' }}> Regístrate Aquí</Text>
             </TouchableOpacity>
-              <View style={{ flexDirection: "row", alignSelf: 'center'}}>
-                <Text style={{color: "black"}}>¿Nuevo en Veggie Vision?</Text>
-                <TouchableOpacity onPress={() => router.push('register')}>
-                    <Text style={{color: "black", fontWeight: "bold"}}> Registrate Aquí</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
+          </View>
+        </View>
       </View>
     </View>
   );

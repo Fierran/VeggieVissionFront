@@ -8,10 +8,13 @@ import { auth,db,storage } from '../../../firebase-config';
 import { collection, addDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import * as ImageManipulator from 'expo-image-manipulator';
+import LoadingModal from './ModalLoading';
+import ErrorModal from './ModalError';
+import SuccessModal from './ModalSucces';
 
 
 
-export default function ModalPhoto({ visible, setPhotoModalVisible }) {
+export default function ModalPhoto({ visible, setPhotoModalVisible, onAnalisisGuardado }) {
   const [facing, setFacing] = useState("back");
   const [image, setImage] = useState(null);
   const cameraRef = useRef(null);
@@ -21,67 +24,82 @@ export default function ModalPhoto({ visible, setPhotoModalVisible }) {
   const rotateValue = useRef(new Animated.Value(0)).current;
   const [resultado, setResultado] = useState(null);
 
+  //Estados para modales adicionales:
+  const [showLoading, setShowLoading] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  useEffect(() => {
+    if (visible) {
+      // Reiniciar el estado cuando el modal se abra
+      setImage(null);
+      setShowCamera(false);
+      setFacing("back");
+    }
+  }, [visible]);
+
+
+
 
 
     //Funcion para enviar la imagen al back
-    const sendImageToBackend = async () => {
-    if (!image || !image.base64) return;
+const sendImageToBackend = async () => {
+  if (!image || !image.base64) return;
 
-    setIsUploading(true);
-    setResultado(null);
+  setResultado(null);
+  setShowLoading(true);  // ← Mostrar modal de carga
 
-    try {
-      const user = auth.currentUser;
+  try {
+    const user = auth.currentUser;
+    if (!user) throw new Error("Usuario no autenticado");
 
-      if (!user) throw new Error("Usuario no autenticado");
+    const formData = new FormData();
+    formData.append('file', {
+      uri: image.uri,
+      name: 'photo.jpg',
+      type: 'image/jpeg'
+    });
+    formData.append('user_id', user.uid);
 
-      const formData = new FormData();
-      formData.append('file', {
-        uri: image.uri,
-        name: 'photo.jpg',
-        type: 'image/jpeg'
-      });
-      formData.append('user_id', user.uid); // puedes usar user.uid si prefieres
+    const response = await fetch('https://veggie-vision-backend.up.railway.app/analysis', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      body: formData,
+    });
 
-      const response = await fetch('https://veggie-vision-backend.up.railway.app/analysis', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-        body: formData,
-      });
+    if (!response.ok) throw new Error("Error al subir imagen");
 
-      if (!response.ok) throw new Error("Error al subir imagen");
+    const data = await response.json();
+    setResultado(data);
+    setShowSuccess(true); // ← Mostrar modal de éxito
+  } catch (error) {
+    console.error(error);
+    setErrorMessage("No se pudo procesar la imagen.");
+    setShowError(true); // ← Mostrar modal de error
+  } finally {
+    setShowLoading(false); // ← Ocultar modal de carga
+  }
+};
 
-      const data = await response.json();
-      setResultado(data); // Actualiza el estado con los datos recibidos
-    } catch (error) {
-      console.error(error);
-      Alert.alert("Error", "No se pudo procesar la imagen.");
-    } finally {
-      setIsUploading(false);
-    }
-  };
 
   //Funcion para guardar analisis
 const guardarAnalisis = async () => {
   if (!resultado || !image) return;
 
+  setShowLoading(true);
   try {
     const user = auth.currentUser;
-    if (!user) {
-      console.log("No hay usuario autenticado");
-      return;
-    }
+    if (!user) throw new Error("No hay usuario autenticado");
 
-    // 🧩 1. Reducir resolución de la imagen
     const manipResult = await ImageManipulator.manipulateAsync(
       image.uri,
-      [{ resize: { width: 300 } }], // Puedes ajustar la resolución
-      { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG } // Comprimir también ayuda
+      [{ resize: { width: 300 } }],
+      { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
     );
 
-    // 🧩 2. Convertir a base64 (de la imagen ya comprimida)
     const response = await fetch(manipResult.uri);
     const blob = await response.blob();
 
@@ -104,19 +122,22 @@ const guardarAnalisis = async () => {
       };
 
       await addDoc(collection(db, "analisis"), nuevoAnalisis);
-      alert("¡Análisis guardado exitosamente!");
-    };
 
+      setShowSuccess(true);
+      
+      // Aquí llamamos a la función recibida por prop para avisar que ya guardamos
+      if (typeof onAnalisisGuardado === 'function') {
+        onAnalisisGuardado();
+      }
+    };
   } catch (error) {
     console.error("Error al guardar el análisis:", error);
-    alert("Error al guardar el análisis.");
+    setErrorMessage("No se pudo guardar el análisis.");
+    setShowError(true);
+  } finally {
+    setShowLoading(false);
   }
 };
-
-
-
-
-
 
 
   useEffect(() => {
@@ -292,6 +313,17 @@ const guardarAnalisis = async () => {
           )}
         </View>
       </View>
+      <LoadingModal visible={showLoading} />
+      <ErrorModal 
+        visible={showError} 
+        message={errorMessage} 
+        onClose={() => setShowError(false)} 
+      />
+      <SuccessModal 
+        visible={showSuccess} 
+        message="Operación completada correctamente." 
+        onClose={() => setShowSuccess(false)} 
+      />
     </Modal>
   );
 }

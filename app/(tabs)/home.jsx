@@ -10,6 +10,7 @@ import Icon2 from "react-native-vector-icons/FontAwesome6";
 import Icon from 'react-native-vector-icons/AntDesign';
 import ModalPhoto from '../Components/Modals/ModalFoto';
 import ModalFilter from '../Components/Modals/ModalFilter';
+import { signOut } from 'firebase/auth';
 import { auth, db } from '../../firebase-config';
 import { collection, getDocs } from "firebase/firestore";
 
@@ -31,6 +32,12 @@ export default function Home() {
   const [tempEstado, setTempEstado] = useState('');
   const [analisisGuardados, setAnalisisGuardados] = useState([]);
 
+  const handleNuevoAnalisisGuardado = async () => {
+    await obtenerAnalisis();         
+    setPhotoModalVisible(false);    
+  };
+
+
   // Función para obtener análisis desde Firestore y actualizar el estado
   const obtenerAnalisis = async () => {
     try {
@@ -39,8 +46,8 @@ export default function Home() {
         id: doc.id,
         ...doc.data()
       }));
-      setFilteredData(todosLosAnalisis); // Actualizamos FlatList con datos de Firestore
-      setAnalisisGuardados(todosLosAnalisis); // Guardamos datos también en otro estado si quieres
+      setFilteredData(todosLosAnalisis);
+      setAnalisisGuardados(todosLosAnalisis);
       return todosLosAnalisis;
     } catch (error) {
       console.error("Error al obtener los análisis:", error);
@@ -110,7 +117,7 @@ export default function Home() {
             <View style={{ width: "10%" }}></View>
             <View style={{ backgroundColor: "#FFFBEB", width: "45%", borderRadius: 5, padding: 7 }}>
               <Text style={{ color: "#F59E08" }}>Se pudre en:</Text>
-              <Text>{item.dias_para_descomponer || 0} días</Text>
+              <Text>{item.dias_para_descomponerse || 0} días</Text>
             </View>
           </View>
         </TouchableOpacity>
@@ -166,17 +173,34 @@ export default function Home() {
       <Animated.View style={[styles.headerContainer, { transform: [{ translateY: headerTranslate }] }]}>
         <Text style={styles.header}>DashBoard de {nombre || 'Usuario'}</Text>
         <Search searchText={searchText} handleSearch={handleSearch} />
-        <TouchableOpacity
-          style={styles.fylter}
-          onPress={() => {
-            setTempTipo(filtroTipo);
-            setTempEstado(filtroEstado);
-            setModalVisible(true);
-          }}
-        >
-          <Icon name="filter" size={20} color={'#000'} />
-          <Text>Filtros</Text>
-        </TouchableOpacity>
+        <View style = {{flexDirection: 'row', height: "90%", justifyContent: 'space-between'}}>
+          <TouchableOpacity
+            style={styles.fylter}
+            onPress={() => {
+              setTempTipo(filtroTipo);
+              setTempEstado(filtroEstado);
+              setModalVisible(true);
+            }}
+          >
+            <Icon name="filter" size={20} color={'#000'} />
+            <Text>Filtros</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={async () => {
+              try {
+                await signOut(auth);
+                console.log("Sesión cerrada");
+                router.replace('/'); // Redirige a la pantalla de inicio de sesión
+              } catch (error) {
+                console.log("Error al cerrar sesión:", error);
+              }
+            }}
+            style={[styles.fylter, {backgroundColor: 'red'}]}
+          >
+            <Text style={{ color: 'white', fontSize: 11, textAlign: 'center' }}>Cerrar sesión</Text>
+          </TouchableOpacity>
+        </View>
+
       </Animated.View>
 
       <Animated.FlatList
@@ -218,6 +242,7 @@ export default function Home() {
       <ModalPhoto
         visible={photoModalVisible}
         setPhotoModalVisible={setPhotoModalVisible}
+        onAnalisisGuardado={handleNuevoAnalisisGuardado}
       />
     </View>
   );
@@ -299,7 +324,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: 10
+    marginLeft: 10,
+    marginRight: 10
   },
   button: {
     height: "15%",
