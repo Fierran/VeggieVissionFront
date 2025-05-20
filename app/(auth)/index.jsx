@@ -43,7 +43,7 @@ export default function SignIn() {
           <Text style={styles.homeText}>Bienvenido a Veggie Vision</Text>
           <TextInput
             onChangeText={setEmail}
-            placeholder=" Nombre de Usuario*"
+            placeholder=" Email*"
             style={styles.input}
             autoCapitalize="none"
           />

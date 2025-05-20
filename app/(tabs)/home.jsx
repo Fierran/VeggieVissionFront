@@ -14,6 +14,7 @@ import { signOut } from 'firebase/auth';
 import { auth, db } from '../../firebase-config';
 import { collection, getDocs } from "firebase/firestore";
 import { query, where } from "firebase/firestore";
+import ResumenAnalisisModal from '../Components/Modals/ModalDetails';
 
 export default function Home() {
   const [facing, setFacing] = useState("back");
@@ -32,6 +33,8 @@ export default function Home() {
   const [tempTipo, setTempTipo] = useState('');
   const [tempEstado, setTempEstado] = useState('');
   const [analisisGuardados, setAnalisisGuardados] = useState([]);
+  const [modalDetalleVisible, setModalDetalleVisible] = useState(false);
+  const [analisisSeleccionado, setAnalisisSeleccionado] = useState(null);
 
   const handleNuevoAnalisisGuardado = async () => {
     await obtenerAnalisis();         
@@ -105,7 +108,10 @@ export default function Home() {
       <Image source={{ uri: item.imagen }} style={styles.image} />
       <View style={{ padding: 10 }}>
         <Text style={styles.title}>{item.fruta || item.name}</Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => {
+          setAnalisisSeleccionado(item);
+          setModalDetalleVisible(true);
+        }}>
           <View style={{ flexDirection: "row", marginTop: 5, marginBottom: 5 }}>
             <View style={{ flexDirection: "row", marginRight: 10, alignItems: "center" }}>
               <Icon2 name="temperature-half" color={"gray"} size={20} />
@@ -136,7 +142,7 @@ export default function Home() {
       </View>
 
       <View style={styles.id}>
-        <Text>{item.id}</Text>
+        <Text>{item.id.slice(0,4)}</Text>
       </View>
 
       <View style={styles.estado}>
@@ -252,6 +258,15 @@ export default function Home() {
         setPhotoModalVisible={setPhotoModalVisible}
         onAnalisisGuardado={handleNuevoAnalisisGuardado}
       />
+      <ResumenAnalisisModal
+        visible={modalDetalleVisible}
+        analisis={analisisSeleccionado}
+        onClose={() => {
+          setModalDetalleVisible(false);
+          setAnalisisSeleccionado(null);
+        }}
+      />
+
     </View>
   );
 }

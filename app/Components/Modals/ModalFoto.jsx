@@ -1,16 +1,16 @@
 import React, {useState, useEffect, useRef } from 'react';
-import { TouchableOpacity, Text, StyleSheet, Modal, View, Image, Alert, Animated, Easing } from "react-native";
+import { TouchableOpacity, Text, StyleSheet, Modal, View, Image, TextInput, Animated, Easing } from "react-native";
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import Icon from 'react-native-vector-icons/Feather';
 import * as ImagePicker from 'expo-image-picker';
 import data from '../../../assets/data/ejemplos.json';
 import { auth,db,storage } from '../../../firebase-config';
 import { collection, addDoc } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import * as ImageManipulator from 'expo-image-manipulator';
 import LoadingModal from './ModalLoading';
 import ErrorModal from './ModalError';
 import SuccessModal from './ModalSucces';
+import Icon2 from "react-native-vector-icons/FontAwesome6";
 
 
 
@@ -23,6 +23,7 @@ export default function ModalPhoto({ visible, setPhotoModalVisible, onAnalisisGu
   const [isUploading, setIsUploading] = useState(false);
   const rotateValue = useRef(new Animated.Value(0)).current;
   const [resultado, setResultado] = useState(null);
+  const [text,setText] = useState('');
 
   //Estados para modales adicionales:
   const [showLoading, setShowLoading] = useState(false);
@@ -30,14 +31,21 @@ export default function ModalPhoto({ visible, setPhotoModalVisible, onAnalisisGu
   const [showSuccess, setShowSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  useEffect(() => {
-    if (visible) {
-      // Reiniciar el estado cuando el modal se abra
-      setImage(null);
-      setShowCamera(false);
-      setFacing("back");
-    }
-  }, [visible]);
+useEffect(() => {
+  if (visible) {
+    setImage(null);
+    setShowCamera(false);
+    setFacing("back");
+    setResultado(null);
+    setText('');
+    setShowLoading(false);
+    setShowError(false);
+    setShowSuccess(false);
+    setErrorMessage('');
+    setIsUploading(false);
+  }
+}, [visible]);
+
 
 
 
@@ -118,7 +126,8 @@ const guardarAnalisis = async () => {
         dias_para_madurar: resultado.ripes_in_days,
         dias_para_descomponerse: resultado.spoils_in_days,
         imagen: base64data,
-        fecha: new Date().toISOString()
+        fecha: new Date().toISOString(),
+        nota: text
       };
 
       await addDoc(collection(db, "analisis"), nuevoAnalisis);
@@ -213,33 +222,74 @@ const guardarAnalisis = async () => {
         <View style={styles.modal}>
           {resultado ? (
             <View style={{ alignItems: 'center' }}>
+              <Text style={[styles.title, {alignSelf: 'flex-start'}]}>Resultados de Analisis</Text>
               <Image source={{ uri: image.uri }} style={{ width: '100%', height: 300, borderRadius: 10 }} resizeMode="contain" />
-              <Text style={styles.title}>Resultado</Text>
-              <Text>Predicción: {resultado.prediction}</Text>
-              <Text>Confianza: {resultado.confidence}%</Text>
-              <Text>Temperatura: {resultado.temperature}°C</Text>
-              <Text>Humedad: {resultado.humidity}%</Text>
-              <Text>Categoría: {resultado.category}</Text>
-              <Text>Días para madurar: {resultado.ripes_in_days}</Text>
-              <Text>Días para descomponerse: {resultado.spoils_in_days}</Text>
+              <View style={{backgroundColor: '#F0FDF4', width: '90%', padding: 10, borderRadius: 10, marginTop: 10}}>
+                <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                  <View>
+                    <Text style={{color: '#16A34A'}}>Type</Text>
+                    <Text style={{fontWeight: 'bold'}}>{resultado.prediction}</Text>
+                  </View>
+                  <View>
+                    <Text style={{color: '#16A34A'}}>Confidence</Text>
+                    <Text style={{fontWeight: 'bold'}}>{resultado.confidence}%</Text>
+                  </View>
+                  <View>
+                    <Text style={{color: '#16A34A'}}>Categoria</Text>
+                    <Text style={{fontWeight: 'bold'}}>{resultado.category}</Text>
+                  </View>
+                </View>
+              </View>
 
-              <TouchableOpacity style={[styles.button, { alignSelf: 'center', backgroundColor: '#16A34A' }]} onPress={resetImage}>
-                <Text style={{ color: '#FFF', fontWeight: 'bold' }}>Nuevo Análisis</Text>
-              </TouchableOpacity>
+              <View style={{marginTop: 5, marginBottom: 5,flexDirection: 'row', alignContent: "space-between" }}>
+                <View style={{backgroundColor: '#EFF6FF', width: '44%', padding: 10, borderRadius: 10, marginRight: '2%'}}>
+                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <Icon2 name="temperature-half" color={"#3B82F6"} size={10} />
+                    <Text style={{color: '#3B82F6'}}> Temperatura</Text>
+                  </View>
+                  <Text style={{fontWeight: 'bold'}}>{resultado.temperature}°C</Text>
+                </View>
+                <View style={{backgroundColor: '#EFF6FF', width: '44%', padding: 10, borderRadius: 10}}>
+                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <Icon2 name="droplet" color={"#3B82F6"} size={10} />
+                    <Text style={{color: '#3B82F6'}}> Humedad</Text>
+                  </View>
+                  <Text style={{fontWeight: 'bold'}}>{resultado.humidity}%</Text>
+                </View>
+              </View>
 
-              <TouchableOpacity onPress={guardarAnalisis} style={{ backgroundColor: '#4CAF50', padding: 10, borderRadius: 5, marginTop: 10 }}>
-                <Text style={{ color: 'white', textAlign: 'center' }}>Guardar análisis</Text>
-              </TouchableOpacity>
+              <View style={{ marginBottom: 5,flexDirection: 'row', alignContent: 'space-around' }}>
+                <View style={{backgroundColor: '#EFF6FF', width: '44%', padding: 10, borderRadius: 10, marginRight: "2%"}}>
+                  <Text style={{ color: "#3B82F6" }}>Madura en</Text>
+                  <Text style={{fontWeight: 'bold'}}>{resultado.ripes_in_days} dias</Text>
+                </View>
+                <View style={{backgroundColor: '#FFFBEB', width: '44%', padding: 10, borderRadius: 10}}>
+                  <Text style={{ color: "#F59E08" }}>Se pudre en</Text>
+                  <Text style={{fontWeight: 'bold'}}>{resultado.spoils_in_days} dias</Text>
+                </View>
+              </View>
+              <Text style={{alignSelf: 'flex-start', marginLeft: '5%'}}>Notas</Text>
+              <TextInput style={styles.textInput}
+                placeholder='Agrega alguna nota aqui'
+                placeholderTextColor={'gray'}
+                value={text}
+                onChangeText={setText}
+                />
+                <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
+                  <TouchableOpacity style={styles.button} onPress={resetImage}>
+                    <Text style={{ color: '#000', fontWeight: 'bold' }}>Regresar</Text>
+                  </TouchableOpacity>
 
-              <TouchableOpacity style={[styles.button, { alignSelf: 'center' }]} onPress={() => setPhotoModalVisible(false)}>
-                <Text>Cerrar</Text>
-              </TouchableOpacity>
+                  <TouchableOpacity onPress={guardarAnalisis} style={[styles.button, {marginLeft: 10, backgroundColor: '#16A34A' }]}>
+                    <Text style={{ color: 'white', textAlign: 'center' }}>Guardar</Text>
+                  </TouchableOpacity>
+                </View>
             </View>
           ) : image ? (
             <>
               <Image source={{ uri: image.uri }} style={{ width: '100%', height: 300, borderRadius: 10 }} resizeMode="contain" />
-              <TouchableOpacity style={[styles.button, { alignSelf: 'center', backgroundColor: '#16A34A' }]} onPress={resetImage}>
-                <Text style={{ color: '#FFF', fontWeight: 'bold' }}>Reintentar</Text>
+              <TouchableOpacity style={[styles.button, { alignSelf: 'center'}]} onPress={resetImage}>
+                <Text style={{ color: '#000', fontWeight: 'bold' }}>Reintentar</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.button, { alignSelf: 'center', backgroundColor: '#16A34A' }]}
@@ -274,7 +324,7 @@ const guardarAnalisis = async () => {
           ) : showCamera ? (
             <>
               <View style={{ width: '100%', aspectRatio: 3 / 4, borderRadius: 10, overflow: 'hidden' }}>
-                <CameraView style={{ width: '100%', height: '100%' }} facing={facing} ref={cameraRef} />
+                <CameraView  style={{ width: '100%', height: '100%' }} facing={facing} ref={cameraRef} />
               </View>
               <TouchableOpacity style={[styles.button, { alignSelf: 'center', backgroundColor: '#16A34A' }]} onPress={takePicture}>
                 <Text style={{ color: '#FFF', fontWeight: 'bold' }}>Tomar Foto</Text>
@@ -376,7 +426,7 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     padding: 7,
     borderRadius: 5,
-    elevation: 5,
+    elevation: 2,
     backgroundColor: '#fff',
     height: 40,
     width: "40%",
@@ -398,4 +448,9 @@ const styles = StyleSheet.create({
     borderTopColor: 'transparent',
     animation: 'spin 1s linear infinite',
   },
+  textInput: {
+    width: '90%',
+    backgroundColor: '#fff',
+    elevation: 0.5
+  }
 });
