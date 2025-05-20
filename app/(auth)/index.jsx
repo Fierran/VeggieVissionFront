@@ -38,9 +38,13 @@ export default function SignIn() {
       />
 
       <View style={styles.content}>
-        <Ionicons name="leaf-outline" size={150} color="#16A34A" />
+        <Image
+          source={require('../../assets/logo.png')} // ajusta la ruta según la ubicación de tu archivo
+          style={{ width: 300, height: 200 }}
+          resizeMode="contain"
+        />
         <View style={{ width: '100%' }}>
-          <Text style={styles.homeText}>Bienvenido a Veggie Vision</Text>
+          <Text style={styles.homeText}>Bienvenido Inicia Sesión</Text>
           <TextInput
             onChangeText={setEmail}
             placeholder=" Email*"

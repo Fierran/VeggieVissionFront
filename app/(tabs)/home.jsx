@@ -7,6 +7,7 @@ import { useRouter } from 'expo-router';
 import { useIsFocused } from "@react-navigation/native";
 import Icon2 from "react-native-vector-icons/FontAwesome6";
 import Icon from 'react-native-vector-icons/AntDesign';
+import Icon3 from "react-native-vector-icons/Ionicons";
 import ModalPhoto from '../Components/Modals/ModalFoto';
 import ModalFilter from '../Components/Modals/ModalFilter';
 import { signOut } from 'firebase/auth';
@@ -215,18 +216,26 @@ export default function Home() {
         </View>
 
       </Animated.View>
+      {analisisGuardados.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Icon3 name="document" size={40} color="#000" />
+          <Text style={styles.emptyTitle}>Aún no hay análisis</Text>
+          <Text style={styles.emptySubtitle}>Cuando registres uno, aparecerá aquí.</Text>
+        </View>
+      ) : (
+        <Animated.FlatList
+          data={filteredData}
+          keyExtractor={item => item.id}
+          renderItem={renderItem}
+          contentContainerStyle={{ paddingTop: 130, paddingBottom: 30 }}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+            { useNativeDriver: true }
+          )}
+          scrollEventThrottle={16}
+        />
+      )}
 
-      <Animated.FlatList
-        data={filteredData}
-        keyExtractor={item => item.id}
-        renderItem={renderItem}
-        contentContainerStyle={{ paddingTop: 130, paddingBottom: 30 }}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: true }
-        )}
-        scrollEventThrottle={16}
-      />
 
       <FloattingButton
         onPress={() => {
@@ -358,4 +367,24 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     borderRadius: 5,
   },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F9FAFB',
+    marginTop: 200
+  },
+  emptyTitle: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    color: 'black',
+    marginBottom: 5,
+    textAlign: 'center'
+  },
+  emptySubtitle: {
+    fontSize: 16,
+    color: 'gray',
+    textAlign: 'center',
+    marginBottom: 20
+  }
 });

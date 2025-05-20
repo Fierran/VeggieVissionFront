@@ -25,7 +25,6 @@ export default function Register() {
       const user = userCredential.user;
       const fullName = `${name} ${lastName}`;
       await updateProfile(user, { displayName: fullName });
-      console.log("Usuario registrado", user);
       setSuccessModalVisible(true);
     } catch (error) {
       console.log(error);

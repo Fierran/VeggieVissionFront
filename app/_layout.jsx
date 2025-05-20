@@ -5,6 +5,7 @@ import { auth } from "../firebase-config";
 import { onAuthStateChanged } from "firebase/auth";
 import { View, ActivityIndicator } from "react-native";
 
+
 const RootLayout = () => {
   const [initialRoute, setInitialRoute] = useState(null);
 
