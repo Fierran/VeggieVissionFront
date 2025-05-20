@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, Animated, TouchableOpacity, Button, Image } fro
 import { useCameraPermissions } from 'expo-camera';
 import FloattingButton from "../Components/FloattingButton";
 import Search from '../Components/search';
-import lotesData from '../../assets/data/ejemplos.json';
 import { useRouter } from 'expo-router';
 import { useIsFocused } from "@react-navigation/native";
 import Icon2 from "react-native-vector-icons/FontAwesome6";
@@ -22,7 +21,7 @@ export default function Home() {
   const cameraRef = useRef(null);
   const router = useRouter();
   const [searchText, setSearchText] = useState('');
-  const [filteredData, setFilteredData] = useState(lotesData);
+  const [filteredData, setFilteredData] = useState(null);
   const scrollY = useRef(new Animated.Value(0)).current;
   const isFocused = useIsFocused();
   const [modalVisible, setModalVisible] = useState(false);
