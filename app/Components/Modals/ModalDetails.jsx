@@ -14,7 +14,7 @@ const ResumenAnalisisModal = ({ visible, onClose, analisis }) => {
 
             <Image
               source={{ uri: analisis.imagen }}
-              style={{ width: "90%", height: 200, borderRadius: 10 }}
+              style={{ width: "90%", height: 250, borderRadius: 10 }}
               resizeMode= "stretch"
             />
 

@@ -44,7 +44,7 @@ export default function SignIn() {
           resizeMode="contain"
         />
         <View style={{ width: '100%' }}>
-          <Text style={styles.homeText}>Bienvenido Inicia Sesión</Text>
+          <Text style={styles.homeText}>Bienvenido, Inicia Sesión</Text>
           <TextInput
             onChangeText={setEmail}
             placeholder=" Email*"

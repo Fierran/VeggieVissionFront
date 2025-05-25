@@ -43,9 +43,9 @@ export default function ModalFilter({
             style={styles.picker}
           >
             <Picker.Item label="Todos" value="" />
-            <Picker.Item label="Maduro" value="Maduro" />
-            <Picker.Item label="Verde" value="Verde" />
-            <Picker.Item label="Podrido" value="Pasada" />
+            <Picker.Item label="Maduro" value="ripe" />
+            <Picker.Item label="Verde" value="unripe" />
+            <Picker.Item label="Podrido" value="rotten" />
           </Picker>
 
           <TouchableOpacity
